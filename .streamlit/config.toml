@@ -1,0 +1,24 @@
+# Configuration Streamlit Cloud
+#
+# Les options locales (port, serverAddress, allowRunOnSave) sont volontairement
+# absentes : Streamlit Cloud les gère lui-même et les redéfinir provoque des
+# avertissements au démarrage.
+
+[server]
+headless = true
+# Nécessaires pour l'embarquement dans un iframe Power BI.
+enableCORS = false
+enableXsrfProtection = false
+maxMessageSize = 200
+
+[browser]
+gatherUsageStats = false
+
+# Thème aligné sur la charte Orange Business — colore aussi les widgets natifs
+# (curseur de saisie, spinner) que le CSS de la page ne peut pas atteindre.
+[theme]
+primaryColor = "#FF7900"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#FFF4E6"
+textColor = "#111111"
+font = "sans serif"

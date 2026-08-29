@@ -1,0 +1,5 @@
+# Interface Streamlit uniquement — les agents LangGraph et le LLM
+# tournent côté FastAPI, pas ici.
+# streamlit >= 1.30 : requis pour st.query_params (API stable)
+streamlit>=1.30
+requests>=2.31
