@@ -194,6 +194,9 @@ duree_moy_evol   = get_param("var_dur", None, float)
 req_evol         = get_param("var_req", None, float)
 pct_auto         = get_param("pct_auto", 0, float)
 disponibilite    = get_param("disponibilite", None, float)
+# Page du dashboard depuis laquelle le chatbot est ouvert — ne transmet au LLM
+# que le bloc de KPIs propre à cette page, voir agent_chatbot côté backend.
+page             = get_param("page", None, str)
 
 # ── Mesure2 — utilisation ──────────────────────────────────────
 sessions         = get_param("sessions", 0, int)
@@ -226,6 +229,7 @@ else:
 contexte_api = {
     "cube_selectionne":            cube,
     "periode":                     periode_texte,
+    "page":                        page,
     "nb_requetes":                 nb_requetes,
     "utilisateurs_actifs":         utilisateurs,
     "duration_moy":                duree_moy,
