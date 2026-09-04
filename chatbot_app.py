@@ -181,9 +181,8 @@ def get_param(key, default=None, cast=str):
 
 # ── Mesures1 — volume, adoption, performance ───────────────────
 cube             = get_param("cube", "Tous les cubes")
-periode_jours    = get_param("periode", "90", int)
-# date_debut/date_fin (calendrier EventDateTime côté Power BI) priment sur le
-# repli periode_jours quand elles sont fournies — voir plus bas.
+# date_debut/date_fin viennent du calendrier EventDateTime côté Power BI (le
+# slicer "N derniers jours" a été retiré de toutes les pages) — voir plus bas.
 date_debut       = get_param("date_debut", "", str)
 date_fin         = get_param("date_fin", "", str)
 nb_requetes      = get_param("nb_requetes", 0, float)
@@ -217,13 +216,12 @@ heures_der_echec = get_param("heures_der_echec", 0, float)
 # Passe par float : Power BI peut envoyer « 167.0 », que int() refuserait.
 nb_echecs        = int(get_param("nb_echecs", 0, float))
 
-# date_debut/date_fin priment sur periode_jours quand elles sont fournies —
-# format "X → Y" identique à celui attendu par agent_chatbot._parse_periode()
+# Format "X → Y" identique à celui attendu par agent_chatbot._parse_periode()
 # côté backend pour peupler le ground truth chatbot.
 if date_debut and date_fin:
     periode_texte = f"{date_debut} → {date_fin}"
 else:
-    periode_texte = f"{periode_jours} derniers jours"
+    periode_texte = "Période non définie"
 
 # Contexte transmis à l'API — les clés correspondent au schéma RequeteChat
 contexte_api = {
