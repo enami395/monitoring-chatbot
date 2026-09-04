@@ -216,17 +216,15 @@ heures_der_echec = get_param("heures_der_echec", 0, float)
 # Passe par float : Power BI peut envoyer « 167.0 », que int() refuserait.
 nb_echecs        = int(get_param("nb_echecs", 0, float))
 
-# Format "X → Y" identique à celui attendu par agent_chatbot._parse_periode()
-# côté backend pour peupler le ground truth chatbot.
-if date_debut and date_fin:
-    periode_texte = f"{date_debut} → {date_fin}"
-else:
-    periode_texte = "Période non définie"
+# Texte affiché uniquement dans la barre de contexte locale — date_debut/
+# date_fin sont transmis tels quels à l'API, sans texte intermédiaire.
+periode_texte = f"{date_debut} → {date_fin}" if (date_debut and date_fin) else "Période non définie"
 
 # Contexte transmis à l'API — les clés correspondent au schéma RequeteChat
 contexte_api = {
     "cube_selectionne":            cube,
-    "periode":                     periode_texte,
+    "date_debut":                  date_debut or None,
+    "date_fin":                    date_fin or None,
     "page":                        page,
     "nb_requetes":                 nb_requetes,
     "utilisateurs_actifs":         utilisateurs,
