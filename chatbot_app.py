@@ -182,6 +182,10 @@ def get_param(key, default=None, cast=str):
 # ── Mesures1 — volume, adoption, performance ───────────────────
 cube             = get_param("cube", "Tous les cubes")
 periode_jours    = get_param("periode", "90", int)
+# date_debut/date_fin (calendrier EventDateTime côté Power BI) priment sur le
+# repli periode_jours quand elles sont fournies — voir plus bas.
+date_debut       = get_param("date_debut", "", str)
+date_fin         = get_param("date_fin", "", str)
 nb_requetes      = get_param("nb_requetes", 0, float)
 utilisateurs     = get_param("utilisateurs", 0, int)
 duree_moy        = get_param("duree_moy", 0, float)
@@ -189,6 +193,7 @@ duree_moy_prec   = get_param("duree_moy_prec", 0, float)
 duree_moy_evol   = get_param("var_dur", None, float)
 req_evol         = get_param("var_req", None, float)
 pct_auto         = get_param("pct_auto", 0, float)
+disponibilite    = get_param("disponibilite", None, float)
 
 # ── Mesure2 — utilisation ──────────────────────────────────────
 sessions         = get_param("sessions", 0, int)
@@ -209,10 +214,18 @@ heures_der_echec = get_param("heures_der_echec", 0, float)
 # Passe par float : Power BI peut envoyer « 167.0 », que int() refuserait.
 nb_echecs        = int(get_param("nb_echecs", 0, float))
 
+# date_debut/date_fin priment sur periode_jours quand elles sont fournies —
+# format "X → Y" identique à celui attendu par agent_chatbot._parse_periode()
+# côté backend pour peupler le ground truth chatbot.
+if date_debut and date_fin:
+    periode_texte = f"{date_debut} → {date_fin}"
+else:
+    periode_texte = f"{periode_jours} derniers jours"
+
 # Contexte transmis à l'API — les clés correspondent au schéma RequeteChat
 contexte_api = {
     "cube_selectionne":            cube,
-    "periode":                     f"{periode_jours} derniers jours",
+    "periode":                     periode_texte,
     "nb_requetes":                 nb_requetes,
     "utilisateurs_actifs":         utilisateurs,
     "duration_moy":                duree_moy,
@@ -220,6 +233,7 @@ contexte_api = {
     "variation_duree":             duree_moy_evol,
     "variation_requetes":          req_evol,
     "pct_automatise":              pct_auto,
+    "disponibilite":               disponibilite,
     "sessions_distinctes":         sessions,
     "ratio_req_session":           ratio_session,
     "pct_cube_actif":              pct_cube_actif,
@@ -251,18 +265,14 @@ st.markdown("")  # espace
 # ══════════════════════════════════════════════════════════════
 # BARRE DE CONTEXTE
 # ══════════════════════════════════════════════════════════════
-# On teste la présence du paramètre dans l'URL plutôt que sa valeur :
-# un taux d'erreur de 0 % est une information, pas une absence de donnée.
-ctx_parts = [
-    f"<strong>Cube :</strong> {cube}",
-    f"<strong>Période :</strong> {periode_jours} jours",
-]
-if "nb_requetes" in params:
-    ctx_parts.append(f"<strong>Requêtes :</strong> {int(nb_requetes):,}".replace(",", " "))
-if "utilisateurs" in params:
-    ctx_parts.append(f"<strong>Utilisateurs :</strong> {utilisateurs}")
-if "taux_echec" in params:
-    ctx_parts.append(f"<strong>Taux erreur :</strong> {taux_echec:.1f}%")
+# Uniquement les cubes sélectionnés (omis si "Tous les cubes" — une sélection
+# globale n'apporte rien à afficher) et la période. Les autres métriques
+# restent transmises au LLM via contexte_api, seule la barre visible est
+# simplifiée.
+ctx_parts = []
+if cube and cube.strip() not in ("Tous les cubes", ""):
+    ctx_parts.append(f"<strong>Cubes :</strong> {cube}")
+ctx_parts.append(f"<strong>Période :</strong> {periode_texte}")
 
 st.markdown(f"""
 <div class="contexte-bar">
@@ -276,9 +286,9 @@ st.markdown(f"""
 # ══════════════════════════════════════════════════════════════
 ACCUEIL = "Bonjour, comment puis-je vous aider sur le monitoring des cubes SSAS ?"
 
-col1, col2, col3 = st.columns([6, 1, 1])
-with col3:
-    if st.button("Nouveau"):
+col1, col2 = st.columns([5, 2])
+with col2:
+    if st.button("Nouveau", use_container_width=True):
         st.session_state.messages = [{"role": "assistant", "content": ACCUEIL}]
         st.rerun()
 
@@ -347,6 +357,6 @@ if question:
 st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
 st.markdown("""
 <div class="footer">
-    Orange Business — Monitoring IA des cubes SSAS — Powered by LangGraph + GPT
+    Orange Business — Monitoring IA des cubes SSAS
 </div>
 """, unsafe_allow_html=True)
