@@ -176,8 +176,10 @@ def get_param(key, default=None, cast=str):
         return default
 
 
-# Seules les valeurs numériques sont transmises : le LLM déduit les tendances
-# directement des chiffres, les libellés Power BI seraient redondants.
+# Majoritairement des valeurs numériques (le LLM déduit les tendances
+# directement des chiffres) + quelques libellés DAX déjà qualifiés
+# (health_etat, lib_var_dispo, lib_var_dur, liste_cubes_erreur) que Power BI
+# calcule mieux que le LLM ne le déduirait d'un chiffre brut.
 
 # ── Mesures1 — volume, adoption, performance ───────────────────
 cube             = get_param("cube", "Tous les cubes")
@@ -188,11 +190,12 @@ date_fin         = get_param("date_fin", "", str)
 nb_requetes      = get_param("nb_requetes", 0, float)
 utilisateurs     = get_param("utilisateurs", 0, int)
 duree_moy        = get_param("duree_moy", 0, float)
-duree_moy_prec   = get_param("duree_moy_prec", 0, float)
-duree_moy_evol   = get_param("var_dur", None, float)
+lib_var_dur      = get_param("lib_var_dur", None, str)
 req_evol         = get_param("var_req", None, float)
 pct_auto         = get_param("pct_auto", 0, float)
+taux_auto_echec  = get_param("taux_auto_echec", 0, float)
 disponibilite    = get_param("disponibilite", None, float)
+health_etat      = get_param("health_etat", None, str)
 # Page du dashboard depuis laquelle le chatbot est ouvert — ne transmet au LLM
 # que le bloc de KPIs propre à cette page, voir agent_chatbot côté backend.
 page             = get_param("page", None, str)
@@ -205,16 +208,19 @@ cubes_inactifs   = get_param("cubes_inactifs", 0, int)
 
 # ── Mesure3 — performance / SLA ────────────────────────────────
 p95              = get_param("p95", 0, float)
+p95_prec         = get_param("p95_prec", 0, float)
 ratio_cpu        = get_param("ratio_cpu", 0, float)
 
 # ── Mesure4 — fiabilité ────────────────────────────────────────
-taux_echec       = get_param("taux_echec", 0, float)
-taux_echec_prec  = get_param("taux_echec_prec", 0, float)
-var_echec        = get_param("var_echec", 0, float)
-cubes_erreur     = get_param("cubes_erreur", 0, int)
-heures_der_echec = get_param("heures_der_echec", 0, float)
+taux_echec         = get_param("taux_echec", 0, float)
+taux_echec_prec    = get_param("taux_echec_prec", 0, float)
+var_echec_pct      = get_param("var_echec_pct", 0, float)
+lib_var_dispo      = get_param("lib_var_dispo", None, str)
+cubes_erreur       = get_param("cubes_erreur", 0, int)
+liste_cubes_erreur = get_param("liste_cubes_erreur", None, str)
+heures_der_echec   = get_param("heures_der_echec", 0, float)
 # Passe par float : Power BI peut envoyer « 167.0 », que int() refuserait.
-nb_echecs        = int(get_param("nb_echecs", 0, float))
+nb_echecs          = int(get_param("nb_echecs", 0, float))
 
 # Texte affiché uniquement dans la barre de contexte locale — date_debut/
 # date_fin sont transmis tels quels à l'API, sans texte intermédiaire.
@@ -229,21 +235,25 @@ contexte_api = {
     "nb_requetes":                 nb_requetes,
     "utilisateurs_actifs":         utilisateurs,
     "duration_moy":                duree_moy,
-    "duree_moy_prec":              duree_moy_prec,
-    "variation_duree":             duree_moy_evol,
+    "lib_var_dur":                 lib_var_dur,
     "variation_requetes":          req_evol,
     "pct_automatise":              pct_auto,
+    "taux_auto_echec":             taux_auto_echec,
     "disponibilite":               disponibilite,
+    "health_etat":                 health_etat,
     "sessions_distinctes":         sessions,
     "ratio_req_session":           ratio_session,
     "pct_cube_actif":              pct_cube_actif,
     "cubes_inactifs":              cubes_inactifs,
     "duree_p95":                   p95,
+    "duree_p95_prec":              p95_prec,
     "ratio_cpu_duree":             ratio_cpu,
     "taux_echec":                  taux_echec,
     "taux_echec_prec":             taux_echec_prec,
-    "taux_echec_variation":        var_echec,
+    "taux_echec_variation":        var_echec_pct,
+    "lib_var_dispo":               lib_var_dispo,
     "cubes_erreur_active":         cubes_erreur,
+    "liste_cubes_erreur":          liste_cubes_erreur,
     "heures_depuis_dernier_echec": heures_der_echec,
     "nb_echecs":                   nb_echecs,
 }
