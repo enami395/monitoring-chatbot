@@ -1,6 +1,6 @@
 # Assistant de monitoring SSAS — Interface chatbot
 
-Interface Streamlit du chatbot de supervision des cubes SSAS (Orange Business).
+Interface Streamlit du chatbot de supervision des cubes SSAS.
 Elle est embarquée dans un dashboard Power BI et interroge un backend FastAPI
 qui orchestre les agents LangGraph.
 

@@ -39,6 +39,11 @@ try:
     API_URL = st.secrets["API_URL"]
 except (KeyError, FileNotFoundError):
     API_URL = "http://localhost:8000"
+# .rstrip("/") : un secret saisi avec un "/" final donnerait une requête vers
+# ".../chat" avec un double slash (".../ngrok-free.dev//chat"), que FastAPI
+# ne fait pas correspondre à la route "/chat" -> 404 alors que le backend et
+# la route sont pourtant corrects.
+API_URL = API_URL.rstrip("/")
 
 # `ngrok-skip-browser-warning` évite la page d'avertissement ngrok
 # qui renverrait du HTML au lieu du JSON attendu.
